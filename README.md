@@ -4,12 +4,13 @@ A Rust-based tool for generating DLL proxy/sideload projects for red team engage
 
 ## Overview
 
-LazyDLLSideload automates the process of creating DLL proxying and sideloading implants. It:
-- windows_sys Ecosystem.
+LazyDLLSideload automates the process of creating DLL proxying and sideloading implants.
+- Uses windows_sys Ecosystem.
 - Parses any Windows DLL to extract exported functions
 - Generates complete Rust projects
+- Strings obfuscation. Decrypts at Runtime.  
 - Supports two operation modes: **Sideload** and **Proxy**
-- Uses [dyncvoke](https://github.com/Whitecat18/dyncvoke) for dynamic invocation and syscall execution..
+- Uses [dyncvoke](https://github.com/Whitecat18/dyncvoke) for dynamic invocation and syscall execution for proxy loads.
 
 ---
 
@@ -52,7 +53,7 @@ Proxy mode creates a sophisticated DLL that:
 
 This is the classic proxying technique - the original DLL is renamed and your proxy DLL sits in its place, forwarding calls while intercepting specific functions.
 
-### Key Components
+### Key Compoments
 
 #### 1. The Dispatch Function
 
@@ -129,9 +130,12 @@ When you use an absolute path like `-p C:\Windows\System32\TextShaping.dll`:
 
 ```
 1. No renaming needed
-2. Deploy: YourProxy.dll in the target directory
-3. DLL_NAME in code: "C:\\Windows\\System32\\TextShaping.dll"
+2. Deploy the YourProxy.dll in the target directory.
+3. DLL_NAME in project will be "C:\\Windows\\System32\\TextShaping.dll"
+4. The proxy dll will load Original DLL directly from system32 and forwards to it.
 ```
+
+
 
 ```bash
 ./LazyDLLSideload.exe -m proxy -p C:\Windows\System32\TextShaping.dll -e ShapingCreateFontCacheData
@@ -166,7 +170,7 @@ cp target/release/LazyDLLSideload.exe .
 ### Proxy Mode
 
 ```bash
-# Relative path mode (recommended)
+# Relative path mode
 ./LazyDLLSideload.exe -m proxy -p <path_to_dll> -e <export_to_hijack> -n <renamed_dll>
 
 # Absolute path mode
@@ -180,11 +184,11 @@ cp target/release/LazyDLLSideload.exe .
 | `-m, --mode` | Mode: `sideload` or `proxy` |
 | `-p, --path` | Path to target DLL |
 | `-e, --export` | Export function name to hijack |
-| `-n, --name` | Original DLL name after renaming (proxy mode only) |
+| `-n, --name` | Original DLL name after renaming (Relative proxy path mode only) |
 
 ---
 
-## Generated Project Structure
+## Project Structure
 
 ### Sideload Mode
 
@@ -227,14 +231,14 @@ fn initialize_component() {
 In proxy mode, The syscalls more are enabled by default. you can change it using:
 
 ```rust
-const NATIVE: bool = true;  // Use NtCreateThreadEx
+const NATIVE: bool = true;  // Use NtCreateThreadEx via syscall
 // vs
 const NATIVE: false;       // Use std::thread::spawn
 ```
 
 ---
 
-## Example Workflow
+## Example Workflow (Relative Path Mode)
 
 ### 1. Identify Target DLL
 
@@ -259,7 +263,7 @@ cargo build --release
 ### 4. Deploy
 
 ```
-# Rename original
+# Copy and Rename original dll 
 rename TextShaping.dll Shaping.dll
 
 # Deploy
@@ -269,6 +273,7 @@ copy Shaping.dll .
 # Now the target app loading TextShaping.dll will:
 # - Get full functionality via forwarding
 # - Execute payload when ShapingCreateFontCacheData is called
+# - Forwards to the original renamed dll Shaping.dll
 ```
 
 ## Requirements
