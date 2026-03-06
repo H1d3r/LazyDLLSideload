@@ -6,7 +6,7 @@ authors = ["5mukx", "smukx@5mukx.site"]
 description = "An Lazy tool to generating DLL proxy/sideload projects"
 repository = "https://github.com/Whitecat18/LazyDLLSideload"
 readme = "README.md"
-license = "LICENSE"
+license = "MIT"
 
 [dependencies]
 getopts = "0.2"
