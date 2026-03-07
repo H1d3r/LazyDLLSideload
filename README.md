@@ -12,7 +12,25 @@ LazyDLLSideload automates the process of creating DLL proxying and sideloading i
 - Supports two operation modes: **Sideload** and **Proxy**
 - Uses [dyncvoke](https://github.com/Whitecat18/dyncvoke) for dynamic invocation and syscall execution for proxy loads.
 
----
+## Installations
+
+### Install as package
+
+Use it anywhere anypath..
+
+```bash
+cargo install LazyDLLSideload
+```
+
+### Clone the repository
+
+```bash
+git clone https://github.com/Whitecat18/LazyDLLSideload.git
+cd LazyDLLSideload
+cargo b -r ; cp target/release/LazyDLLSideload.exe . 
+```
+
+# Usage
 
 ## Mode 1: Sideload
 
