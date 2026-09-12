@@ -10,7 +10,7 @@ LazyDLLSideload automates the process of creating DLL proxying and sideloading i
 - Generates complete Rust projects
 - Strings obfuscation. Decrypts at Runtime.  
 - Supports two operation modes: **Sideload** and **Proxy**
-- Uses [dyncvoke](https://github.com/Whitecat18/dyncvoke) for dynamic invocation and syscall execution for proxy loads.
+- Uses [dyncvoke](https://crates.io/crates/dyncvoke) (`dyncvoke = "0.1"`) for PEB-walked `LoadLibrary` / EAT lookup and Tartarus Gate `NtCreateThreadEx` on the hijacked export.
 
 ## Installations
 
@@ -106,7 +106,7 @@ This tells the Windows loader to automatically forward calls to `Shaping.dll` (t
 
 #### 3. Dynamic Function Invocation (dyncvoke)
 
-The tool uses [dyncvoke](https://github.com/Whitecat18/dyncvoke): 
+The tool uses [dyncvoke](https://crates.io/crates/dyncvoke): 
 - **Better OPSEC**: No import table entries for the original DLL
 - **Syscalls**: Can use `NtCreateThreadEx` for thread creation (set `NATIVE = true`)
 - **No suspicious imports**: The proxy DLL has no explicit dependency on the target DLL
@@ -222,10 +222,9 @@ project_name/
 
 ```
 project_name/
-├── Cargo.toml          # Includes dyncvoke dependency
+├── Cargo.toml          # dyncvoke from crates.io
 ├── build.rs            # Links proxy.def
 ├── proxy.def           # Export table with forwarding
-├── dyncvoke/        # Dynamic invocation library
 └── src/
     ├── lib.rs          # Gateway + hijacked function
     └── forward.rs      # Stub functions (satisfies linker)
@@ -249,9 +248,9 @@ fn initialize_component() {
 In proxy mode, The syscalls more are enabled by default. you can change it using:
 
 ```rust
-const NATIVE: bool = true;  // Use NtCreateThreadEx via syscall
+const NATIVE: bool = true;  // NtCreateThreadEx via dyncvoke::syscall!
 // vs
-const NATIVE: false;       // Use std::thread::spawn
+const NATIVE: bool = false; // std::thread::spawn
 ```
 
 ---

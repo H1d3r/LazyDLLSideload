@@ -1,12 +1,20 @@
 [package]
 name = "LazyDLLSideload"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["5mukx", "smukx@5mukx.site"]
 description = "An Lazy tool to generating DLL proxy/sideload projects"
 repository = "https://github.com/Whitecat18/LazyDLLSideload"
 readme = "README.md"
 license = "MIT"
+
+[lib]
+name = "lazy_dll_sideload"
+path = "src/lib.rs"
+
+[[bin]]
+name = "LazyDLLSideload"
+path = "src/main.rs"
 
 [dependencies]
 getopts = "0.2"
