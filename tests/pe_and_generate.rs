@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use lazy_dll_sideload::generate::{generate, hijack_present, GenOpts, Mode};
-use lazy_dll_sideload::pe::{parse_exports_from_bytes, parse_pe_exports, Export};
+use lazy_dll_sideload::generate::{GenOpts, Mode, generate, hijack_present};
+use lazy_dll_sideload::pe::{Export, parse_exports_from_bytes, parse_pe_exports};
 
 fn opts(mode: Mode, absolute: bool) -> GenOpts {
     GenOpts {
@@ -39,9 +39,10 @@ fn generated_code_does_not_write_thread_handle_to_null() {
         ordinal: 1,
     }];
     let p = generate(&opts(Mode::Proxy, true), &exports);
-    assert!(p
-        .lib_rs
-        .contains("let mut thread: *mut c_void = ptr::null_mut()"));
+    assert!(
+        p.lib_rs
+            .contains("let mut thread: *mut c_void = ptr::null_mut()")
+    );
     assert!(p.lib_rs.contains("&mut thread as *mut *mut c_void"));
     assert!(!p.lib_rs.contains("*mut HANDLE = ptr::null_mut()"));
     assert!(p.lib_rs.contains("-1isize"));
@@ -57,11 +58,12 @@ fn live_version_dll_round_trip() {
     let exports = parse_pe_exports(path).expect("parse version.dll");
     assert!(hijack_present(&exports, "GetFileVersionInfoA"));
     let p = generate(&opts(Mode::Proxy, true), &exports);
-    assert!(p
-        .proxy_def
-        .as_ref()
-        .unwrap()
-        .contains("GetFileVersionInfoA @"));
+    assert!(
+        p.proxy_def
+            .as_ref()
+            .unwrap()
+            .contains("GetFileVersionInfoA @")
+    );
     assert!(p.forward_rs.contains("GetFileVersionInfoW") || exports.len() == 1);
     assert!(p.lib_rs.contains(r"C:\\Windows\\System32\\version.dll"));
 }
